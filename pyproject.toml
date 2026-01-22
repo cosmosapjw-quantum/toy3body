@@ -1,0 +1,20 @@
+[project]
+name = "toy3body-topo"
+version = "0.1.0"
+description = "Toy 3-body scattering + shape-space topological fingerprints (loops + linking numbers)"
+requires-python = ">=3.10"
+dependencies = [
+  "numpy>=1.24",
+  "scipy>=1.10",
+  "pandas>=2.0",
+  "tqdm>=4.0",
+  "h5py>=3.0",
+  "numexpr>=2.0",
+]
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
