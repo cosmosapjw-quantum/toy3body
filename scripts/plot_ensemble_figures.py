@@ -23,12 +23,12 @@ DEFAULT_FEATURES = [
     "r_min",
     "d3_min",
     "n_loops",
-    "loop_mean_gap",
-    "loop_max_dur",
+    "loop_writhe_abs_mean",
+    "wind_abs",
+    "wind_total",
     "link_ok_frac",
-    "link_nz_frac",
     "link_mean_abs",
-    "link_raw_mean_abs",
+    "link_nz_frac",
 ]
 
 

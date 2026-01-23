@@ -104,6 +104,24 @@ class LoopParams:
     # resample each loop to fixed number of points (controls linking accuracy/cost)
     resample_n: int = 256
 
+    # embedding/coordinates used for loop extraction + linking
+    #  - 'logdist': raw (log r12, log r23, log r31)
+    #  - 'uvrho': symmetric shape (u,v) + scale (rho) from log-distances
+    #  - 'delay_d3': Takens-style delay embedding of log d3(t) into R^3
+    shape_mode: str = "uvrho"
+    # weight for the scale coordinate in NN search (only used for 'uvrho')
+    nn_rho_weight: float = 0.25
+    # standardize coordinates (zero mean / unit std) before loop extraction/linking
+    standardize: bool = True
+
+    # delay embedding params (used for shape_mode starting with 'delay_')
+    delay_tau: float = 5.0          # physical time lag
+    delay_uniform_n: int = 2048     # uniform resample length before embedding
+
+    # loop candidate controls (tradeoff: more loops vs more false positives)
+    max_pairs_per_i: int = 2        # keep up to this many NN candidates per i
+    max_overlap_frac: float = 0.2   # allow limited overlap between accepted loops
+
     # linking quality gates
     link_round_tol: float = 0.1
     link_min_sep: float = 1e-3

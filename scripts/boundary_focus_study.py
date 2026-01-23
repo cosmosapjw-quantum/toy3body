@@ -183,6 +183,44 @@ def save_boxplot(x: np.ndarray, y: np.ndarray, labels: Tuple[str, str], title: s
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
+def save_scatter(df: pd.DataFrame, xcol: str, ycol: str, huecol: str, title: str, path: str) -> None:
+    if xcol not in df.columns or ycol not in df.columns or huecol not in df.columns:
+        return
+    fig, ax = plt.subplots(figsize=(4.2, 3.2))
+    for key, sub in df.groupby(huecol):
+        x = sub[xcol].to_numpy(dtype=float)
+        y = sub[ycol].to_numpy(dtype=float)
+        m = np.isfinite(x) & np.isfinite(y)
+        if np.sum(m) == 0:
+            continue
+        ax.scatter(x[m], y[m], s=8, alpha=0.35, label=str(key))
+    ax.set_xlabel(xcol)
+    ax.set_ylabel(ycol)
+    ax.set_title(title)
+    ax.legend(frameon=False, fontsize=8)
+    fig.tight_layout()
+    fig.savefig(path, bbox_inches='tight')
+    plt.close(fig)
+
+def save_hist(df: pd.DataFrame, col: str, huecol: str, title: str, path: str, bins: int = 40) -> None:
+    if col not in df.columns or huecol not in df.columns:
+        return
+    fig, ax = plt.subplots(figsize=(4.2, 3.2))
+    for key, sub in df.groupby(huecol):
+        x = sub[col].to_numpy(dtype=float)
+        x = x[np.isfinite(x)]
+        if len(x) == 0:
+            continue
+        ax.hist(x, bins=bins, histtype='step', density=True, label=str(key))
+    ax.set_xlabel(col)
+    ax.set_ylabel('density')
+    ax.set_title(title)
+    ax.legend(frameon=False, fontsize=8)
+    fig.tight_layout()
+    fig.savefig(path, bbox_inches='tight')
+    plt.close(fig)
+
+
 
 def analyze(csv_path: str, out_dir: str, cfg: Dict[str, Any]) -> Dict[str, Any]:
     df = pd.read_csv(csv_path)
@@ -190,7 +228,7 @@ def analyze(csv_path: str, out_dir: str, cfg: Dict[str, Any]) -> Dict[str, Any]:
         raise ValueError("CSV missing 'subset' column; did you run boundary_focus_study correctly?")
 
     analysis_cfg = cfg.get("analysis", {})
-    metrics = analysis_cfg.get("metrics", ["n_loops", "link_mean_abs", "link_nz_frac", "link_ok_frac", "t_int", "r_min"])
+    metrics = analysis_cfg.get("metrics", ["t_int","n_loops","link_ok_frac","link_mean_abs","loop_writhe_abs_mean","wind_abs","wind_total","r_min"])
     min_loops = int(analysis_cfg.get("min_loops_for_link_stats", 2))
     min_ok = float(analysis_cfg.get("min_ok_frac_for_link_stats", 0.0))
 
@@ -293,6 +331,29 @@ def analyze(csv_path: str, out_dir: str, cfg: Dict[str, Any]) -> Dict[str, Any]:
             f"{m} (all)",
             m,
             os.path.join(fig_dir, f"box_{m}_all.pdf"),
+        )
+
+    # extra paper-friendly plots (optional)
+    scatter_pairs = analysis_cfg.get("scatter_pairs", [("t_int","wind_abs"), ("t_int","loop_writhe_abs_mean"), ("t_int","n_loops")])
+    for (xcol, ycol) in scatter_pairs:
+        save_scatter(
+            df,
+            xcol=xcol,
+            ycol=ycol,
+            huecol="subset",
+            title=f"{ycol} vs {xcol}",
+            path=os.path.join(fig_dir, f"scatter_{ycol}_vs_{xcol}.pdf"),
+        )
+
+    hist_metrics = analysis_cfg.get("hist_metrics", ["wind_abs", "wind_total", "loop_writhe_abs_mean", "n_loops", "t_int"])
+    for col in hist_metrics:
+        save_hist(
+            df,
+            col=col,
+            huecol="subset",
+            title=f"hist: {col}",
+            path=os.path.join(fig_dir, f"hist_{col}.pdf"),
+            bins=int(analysis_cfg.get("hist_bins", 40)),
         )
 
     save_json(summary, os.path.join(out_dir, "summary.json"))

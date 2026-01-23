@@ -1,0 +1,41 @@
+{
+  "phys": {
+    "m1": 1.0,
+    "m2": 1.0,
+    "m3": 1.0,
+    "G": 1.0,
+    "c": null,
+    "k_merge": 6.0,
+    "k_warn": 20.0
+  },
+  "R0": 100.0,
+  "theta": 0.0,
+  "nb": 80,
+  "nphi": 80,
+  "b_range": [
+    0.0,
+    6.0
+  ],
+  "seed0": 30000,
+  "workers": 0,
+  "chunksize": 8,
+  "max_runtime_sec": 1.5,
+  "out_dir": "out_basin_eq_v03",
+  "v_inf": 0.3,
+  "sim": {
+    "t_max": 3000.0,
+    "dt_chunk": 50.0,
+    "method": "DOP853",
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "max_step": null,
+    "hier_ratio": 6.0,
+    "R_end": 450.0,
+    "R_int": 30.0,
+    "max_store_points": 20000,
+    "decimate_to": 4000,
+    "max_walltime_sec": 2.0,
+    "min_t_advance": 1e-07,
+    "r_coll": 0.0
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "out_csv": "scan_regimes_small.csv",
+  "phys_base": {
+    "m1": 1.0,
+    "m2": 1.0,
+    "m3": 1.0,
+    "G": 1.0,
+    "c": null,
+    "k_merge": 6.0,
+    "k_warn": 20.0
+  },
+  "sim": {
+    "t_max": 1500.0,
+    "dt_chunk": 50.0,
+    "method": "DOP853",
+    "rtol": 1e-09,
+    "atol": 1e-12,
+    "max_step": null,
+    "hier_ratio": 6.0,
+    "R_end": 450.0,
+    "R_int": 30.0,
+    "max_store_points": 12000,
+    "decimate_to": 2000,
+    "max_walltime_sec": 1.0,
+    "min_t_advance": 1e-07,
+    "r_coll": 0.0
+  },
+  "v_inf_list": [
+    0.3,
+    0.5,
+    0.8
+  ],
+  "nu_list": [
+    0.1,
+    0.3,
+    1.0
+  ],
+  "epsilon_list": [
+    0.0
+  ],
+  "b_range": [
+    0.0,
+    6.0
+  ],
+  "R0": 100.0,
+  "theta": 0.0,
+  "n_samples": 300,
+  "seed0": 50000,
+  "loop": {
+    "shape_mode": "uvrho",
+    "nn_rho_weight": 0.25,
+    "standardize": true,
+    "eps_close": 0.03,
+    "k_nn": 32,
+    "max_pairs_per_i": 2,
+    "max_overlap_frac": 0.25,
+    "min_dt": 12.0,
+    "max_loops_base": 3,
+    "max_loops_long": 10,
+    "t_long": 700.0,
+    "resample_n": 384,
+    "link_round_tol": 0.3,
+    "link_min_sep": 0.05
+  },
+  "workers": 0
+}

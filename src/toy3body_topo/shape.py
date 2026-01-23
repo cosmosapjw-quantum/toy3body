@@ -21,6 +21,35 @@ def shape_logdist(r: NDArray[np.float64], eps: float = 1e-15) -> NDArray[np.floa
     return np.log(d + eps)
 
 
+
+def shape_uvrho(r: NDArray[np.float64], eps: float = 1e-15) -> NDArray[np.float64]:
+    """Shape+scale coordinates built from log pairwise distances.
+
+    Returns S(t) = (u, v, rho) where:
+      - rho is the mean log-distance (log of geometric-mean scale)
+      - (u, v) are an orthonormal projection of the *shape* part
+        (log-distances with rho removed) onto a symmetric 2D basis.
+
+    This is useful for close-return detection because:
+      - recurrent *shape* can occur at different overall scales in scattering,
+      - separating scale reduces spurious "no loop found" failures.
+
+    Notes:
+      - (u, v) live in the sum-zero plane of (log r12, log r23, log r31)
+      - any orthonormal basis of that plane is fine; we use a standard symmetric choice.
+    """
+    s = shape_logdist(r, eps=eps)  # (T,3)
+    rho = np.mean(s, axis=1)       # (T,)
+    s0 = s - rho[:, None]          # shape part, sum ~ 0
+
+    # Orthonormal basis for the sum-zero plane in R^3
+    e1 = np.array([1.0, -1.0, 0.0], dtype=float) / np.sqrt(2.0)
+    e2 = np.array([1.0, 1.0, -2.0], dtype=float) / np.sqrt(6.0)
+    u = s0 @ e1
+    v = s0 @ e2
+    return np.stack([u, v, rho], axis=1)
+
+
 def binary_com(r: NDArray[np.float64], m1: float, m2: float) -> NDArray[np.float64]:
     """Binary COM trajectory: (T,2)"""
     M = m1 + m2

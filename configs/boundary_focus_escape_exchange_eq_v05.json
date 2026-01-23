@@ -1,0 +1,77 @@
+{
+  "basin_dir": "out_basin_eq_v05",
+  "out_dir": "out_boundary_eq_v05_escape_exchange",
+  "sampling": {
+    "boundary_radius_pix": 1,
+    "epsilon": 0.2,
+    "allowed_labels": [
+      0,
+      1
+    ],
+    "n_boundary": 2500,
+    "n_interior": 900,
+    "jitter_pix": 1.0,
+    "seed": 123
+  },
+  "overrides": {
+    "sim": {
+      "t_max": 3000.0,
+      "R_end": 450.0,
+      "hier_ratio": 6.0,
+      "max_walltime_sec": 2.0
+    },
+    "loop": {
+      "shape_mode": "uvrho",
+      "nn_rho_weight": 0.25,
+      "standardize": true,
+      "eps_close": 0.03,
+      "k_nn": 32,
+      "max_pairs_per_i": 3,
+      "max_overlap_frac": 0.25,
+      "min_dt": 12.0,
+      "max_loops_base": 4,
+      "max_loops_long": 12,
+      "t_long": 700.0,
+      "resample_n": 512,
+      "link_round_tol": 0.3,
+      "link_min_sep": 0.05
+    }
+  },
+  "analysis": {
+    "metrics": [
+      "t_int",
+      "n_loops",
+      "wind_abs",
+      "wind_total",
+      "loop_writhe_abs_mean",
+      "link_ok_frac",
+      "link_mean_abs",
+      "r_min"
+    ],
+    "min_loops_for_link_stats": 2,
+    "min_ok_frac": 0.25,
+    "stratify_by_base_label": true,
+    "scatter_pairs": [
+      [
+        "t_int",
+        "wind_abs"
+      ],
+      [
+        "t_int",
+        "loop_writhe_abs_mean"
+      ],
+      [
+        "t_int",
+        "n_loops"
+      ]
+    ],
+    "hist_metrics": [
+      "wind_abs",
+      "wind_total",
+      "loop_writhe_abs_mean",
+      "n_loops",
+      "t_int"
+    ],
+    "hist_bins": 50
+  }
+}

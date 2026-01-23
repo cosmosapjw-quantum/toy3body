@@ -107,3 +107,49 @@ def linking_fingerprint(curves: list[NDArray[np.float64]],
         "raw_mean_abs": raw_mean_abs,
         "L": L,
     }
+
+
+def gauss_writhe(curve: NDArray[np.float64], skip_near: int = 2) -> float:
+    """Approximate writhe of a (closed) 3D curve using a Gauss integral discretization.
+
+    Writhe is a geometric/topological proxy (real-valued) that can be computed from a single loop,
+    unlike the integer Gauss linking number which needs two loops.
+
+    Parameters
+    ----------
+    curve : (N+1,3) closed polyline (last == first)
+    skip_near : exclude pairs of nearby segments (to avoid near-singular contributions)
+
+    Returns
+    -------
+    Wr : float
+    """
+    curve = np.asarray(curve, dtype=float)
+    if curve.ndim != 2 or curve.shape[0] < 5:
+        return 0.0
+
+    # segments + midpoints
+    dr = np.diff(curve, axis=0)  # (N,3)
+    mid = 0.5 * (curve[:-1] + curve[1:])  # (N,3)
+    N = dr.shape[0]
+
+    R = mid[:, None, :] - mid[None, :, :]          # (N,N,3)
+    denom = np.linalg.norm(R, axis=-1) ** 3 + 1e-30
+
+    cross = np.cross(dr[:, None, :], dr[None, :, :])  # (N,N,3)
+    num = np.einsum("ijk,ijk->ij", R, cross)
+
+    mask = np.ones((N, N), dtype=bool)
+    np.fill_diagonal(mask, False)
+
+    kmax = max(0, int(skip_near))
+    for k in range(1, kmax + 1):
+        # near-diagonal
+        mask[np.arange(0, N - k), np.arange(k, N)] = False
+        mask[np.arange(k, N), np.arange(0, N - k)] = False
+        # wrap-around adjacency on a closed curve
+        mask[np.arange(0, k), np.arange(N - k, N)] = False
+        mask[np.arange(N - k, N), np.arange(0, k)] = False
+
+    val = (1.0 / (4.0 * np.pi)) * float(np.sum((num / denom)[mask]))
+    return float(val)
