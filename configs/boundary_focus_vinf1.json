@@ -1,5 +1,5 @@
 {
-  "basin_dir": "out_basin_vinf1_medium",
+  "basin_dir": "out_basin",
   "out_dir": "out_boundary_vinf1",
 
   "inherit_basin_config": true,
@@ -30,7 +30,7 @@
   },
 
   "sampling": {
-    "allowed_labels": [0, 1],
+    "allowed_labels": [0, 3],
     "boundary_mode": "allowed_change",
 
     "near_radius_pix": 2,

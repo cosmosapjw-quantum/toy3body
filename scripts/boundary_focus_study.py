@@ -176,7 +176,7 @@ def compare_metric(x: np.ndarray, y: np.ndarray) -> Dict[str, Any]:
 
 def save_boxplot(x: np.ndarray, y: np.ndarray, labels: Tuple[str, str], title: str, ylabel: str, path: str) -> None:
     fig, ax = plt.subplots(figsize=(4.2, 3.2))
-    ax.boxplot([x, y], labels=list(labels), showfliers=False)
+    ax.boxplot([x, y], tick_labels=list(labels), showfliers=False)
     ax.set_title(title)
     ax.set_ylabel(ylabel)
     fig.tight_layout()
