@@ -45,6 +45,7 @@ def integrate_scatter(units: Units,
                       phys: PhysicalParams,
                       sim: SimParams,
                       y0: NDArray[np.float64],
+                      max_runtime_sec=None,
                       rhs_fun=None) -> dict:
     """Chunked integration with early stopping and safety rails.
 
@@ -77,7 +78,10 @@ def integrate_scatter(units: Units,
     y_chunks: list[NDArray[np.float64]] = [y[None, :]]
 
     start = time.time()
-    max_wall = float(getattr(sim, "max_walltime_sec", 0.0) or 0.0)
+    if max_runtime_sec is None:
+        max_wall = float(getattr(sim, "max_walltime_sec", 0.0) or 0.0)
+    else:
+        max_wall = float(max_runtime_sec)
     min_adv = float(getattr(sim, "min_t_advance", 0.0) or 0.0)
 
     solver_success = True
@@ -103,12 +107,21 @@ def integrate_scatter(units: Units,
             ev_stop.direction = -1
             events = [ev_stop]
 
+            max_step = sim.max_step
+            if max_step is None:
+                max_step = np.inf
+            else:
+                max_step = float(max_step)
+
+            if not np.isfinite(max_step) or max_step <= 0:
+                max_step = np.inf
+
         try:
             sol = solve_ivp(
                 fun, (t0, t1), y,
                 method=sim.method,
                 rtol=sim.rtol, atol=sim.atol,
-                max_step=sim.max_step,
+                max_step=max_step,
                 events=events,
             )
         except TimeoutError:

@@ -55,6 +55,12 @@ def basin_entropy_boxed(grid: NDArray[np.int64], n_outcomes: int, box: int) -> d
     for i in range(bx):
         for j in range(by):
             block = g[i*box:(i+1)*box, j*box:(j+1)*box].ravel()
+            # Filter out negative values (invalid/uncomputed data)
+            block = block[block >= 0]
+            if len(block) == 0:
+                # Skip empty blocks
+                total += 1
+                continue
             counts = np.bincount(block, minlength=n_outcomes).astype(float)
             p = counts / counts.sum()
             # Shannon entropy
