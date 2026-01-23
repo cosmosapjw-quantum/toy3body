@@ -1,6 +1,10 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
+*.pyc
+*.pyo
+*.pyd
+*.pyz
 *$py.class
 
 # C extensions
@@ -205,3 +209,31 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Project outputs and runtime artifacts
+# Top-level output directories produced by runs
+out_*/
+out_basin/
+out_runs/
+
+# Generated binary data
+*.npz
+*.npy
+
+# Figures and summaries (sometimes generated outside out_runs)
+figs*/
+figs_*/*
+
+# Run metadata files
+runs.csv
+run_summary.json
+config_used.json
+
+# Temporary and log files
+*.log
+*.tmp
+*.cache
+
+# Local editor directories
+.vscode/
+

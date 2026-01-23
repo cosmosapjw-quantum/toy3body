@@ -40,11 +40,11 @@
   "output": {
     "out_dir": "out_runs",
     "store_raw": true,
-    "store_raw_every": 25,
+    "store_raw_every": 1,
     "compress_npz": true
   },
   "parallel": {
-    "workers": 0,
+    "workers": 2,
     "chunksize": 2
   },
   "a0": 1.0,

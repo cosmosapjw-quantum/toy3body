@@ -11,14 +11,18 @@ from .outcomes import classify_final_pair, outcome_label
 def run_outcome_only(seed: int,
                      phys: PhysicalParams,
                      sim: SimParams,
-                     ic: ICParams) -> dict:
+                     ic: ICParams,
+                     max_runtime_sec: float = None) -> dict:
     units = Units()
     y0 = make_initial_state(units, phys, ic)
-    res = integrate_scatter(units, phys, sim, y0)
+    res = integrate_scatter(units, phys, sim, y0, max_runtime_sec=max_runtime_sec)
 
     final_info = classify_final_pair(units, phys, res["Y"][-1])
     if res["merged"]:
-        label = "merger_cut"
+        if res.get("stop_reason") == "r_coll":
+            label = "collision_cut"
+        else:
+            label = "merger_cut"
     elif res["timeout"]:
         label = "timeout"
     else:

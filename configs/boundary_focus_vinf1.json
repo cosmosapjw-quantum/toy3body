@@ -1,0 +1,61 @@
+{
+  "basin_dir": "out_basin_vinf1_medium",
+  "out_dir": "out_boundary_vinf1",
+
+  "inherit_basin_config": true,
+
+  "overrides": {
+    "sim": {
+      "t_max": 3000.0,
+      "R_end": 450.0,
+      "hier_ratio": 6.0
+    },
+    "loop": {
+      "eps_close": 0.015,
+      "min_dt": 8.0,
+      "k_nn": 16,
+      "max_loops_base": 1,
+      "max_loops_long": 10,
+      "t_long": 250.0,
+      "resample_n": 384,
+      "link_round_tol": 0.1,
+      "link_min_sep": 0.001
+    }
+  },
+
+  "output": {
+    "store_raw": true,
+    "store_raw_every": 200,
+    "compress_npz": true
+  },
+
+  "sampling": {
+    "allowed_labels": [0, 1],
+    "boundary_mode": "allowed_change",
+
+    "near_radius_pix": 2,
+    "interior_min_radius_pix": 12,
+
+    "n_boundary_pixels": 900,
+    "refine_per_pixel": 4,
+
+    "n_interior_pixels": 900,
+    "refine_interior_per_pixel": 1,
+
+    "jitter_frac": 0.95,
+    "stratify_interior_by_base_label": true
+  },
+
+  "parallel": {
+    "workers": 0,
+    "chunksize": 1
+  },
+
+  "seed0": 500000,
+
+  "analysis": {
+    "metrics": ["n_loops", "link_mean_abs", "link_nz_frac", "link_ok_frac", "t_int", "r_min"],
+    "min_loops_for_link_stats": 2,
+    "min_ok_frac_for_link_stats": 0.0
+  }
+}

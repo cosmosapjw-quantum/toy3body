@@ -1,0 +1,50 @@
+{
+  "out_dir": "out_runs",
+  "seed0": 1234,
+  "max_workers": 0,
+  "store_raw_every": 80,
+  "rerun_if_missing_raw": false,
+
+  "mu_list": [1.0, 0.1, 0.01],
+  "nu_list": [0.1, 0.01, 0.001],
+  "epsilon_list": [0.0, 0.001],
+  "v_inf_list": [0.3, 1.0, 2.5],
+  "b_max": 7.0,
+  "n_per_setting": 7,
+
+  "ic_a0": 1.0,
+  "ic_e0": 0.0,
+  "ic_R0": 110.0,
+  "randomize_phase": true,
+  "randomize_theta": true,
+
+  "phys_k_warn": 50.0,
+  "phys_k_merge": 10.0,
+
+  "sim_method": "DOP853",
+  "sim_rtol": 1e-9,
+  "sim_atol": 1e-11,
+  "sim_max_step": null,
+  "sim_t_max": 1200.0,
+  "sim_dt_chunk": 40.0,
+  "sim_R_int": 22.0,
+  "sim_R_end": 260.0,
+  "sim_hier_ratio": 6.0,
+  "sim_max_store_points": 14000,
+  "sim_decimate_to": 3500,
+
+  "loop_eps_close": 0.012,
+  "loop_min_dt": 10.0,
+  "loop_k_nn": 16,
+  "loop_max_loops_base": 1,
+  "loop_max_loops_long": 4,
+  "loop_t_long": 150.0,
+  "loop_resample_n": 256,
+  "loop_link_round_tol": 0.12,
+  "loop_link_min_sep": 0.001,
+
+  "selection_extra_focus_long_dwell": true,
+  "selection_long_dwell_quantile": 0.92,
+  "selection_extra_pass_max_loops": 6,
+  "selection_extra_pass_resample_n": 384
+}

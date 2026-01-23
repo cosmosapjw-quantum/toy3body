@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+from typing import Optional
 import numpy as np
 from numpy.typing import NDArray
 from scipy.integrate import solve_ivp
@@ -45,7 +46,13 @@ def integrate_scatter(units: Units,
                       sim: SimParams,
                       y0: NDArray[np.float64],
                       rhs_fun=None) -> dict:
-    """Chunked integration with early stopping and merger-cut event."""
+    """Chunked integration with early stopping and safety rails.
+
+    Basin-map sweeps can contain pathological initial conditions:
+      * extremely close encounters that make the solver stall,
+      * solver failures (status=-1) that must terminate the loop.
+    """
+
     t0 = 0.0
     y = y0.copy()
 
@@ -53,59 +60,125 @@ def integrate_scatter(units: Units,
     r_merge = phys.k_merge * rg if rg > 0 else -np.inf
     r_warn = phys.k_warn * rg if rg > 0 else -np.inf
 
+    # numerical collision cut
+    r_coll = float(getattr(sim, "r_coll", 0.0) or 0.0)
+    r_stop = max((r_merge if np.isfinite(r_merge) and r_merge > 0 else 0.0), r_coll)
+    use_stop_event = (r_stop > 0.0)
+
     pn_warning = False
     merged = False
     timeout = False
+    stop_reason = ""
 
-    # diagnostics
     E0 = energy_newton(y, units, phys)
 
-    t_list: list[float] = []
-    y_chunks: list[NDArray[np.float64]] = []
+    # keep at least initial point
+    t_list: list[float] = [0.0]
+    y_chunks: list[NDArray[np.float64]] = [y[None, :]]
 
     start = time.time()
+    max_wall = float(getattr(sim, "max_walltime_sec", 0.0) or 0.0)
+    min_adv = float(getattr(sim, "min_t_advance", 0.0) or 0.0)
+
+    solver_success = True
+    solver_status = 0
+    solver_message = "OK"
+
     while t0 < sim.t_max:
         t1 = min(t0 + sim.dt_chunk, sim.t_max)
+        t_prev = float(t0)
 
         def fun(t, yy):
+            if max_wall > 0.0 and (time.time() - start) > max_wall:
+                raise TimeoutError(f"max_walltime_sec={max_wall} exceeded")
             if rhs_fun is None:
                 return rhs_newton(t, yy, units, phys)
             return rhs_fun(t, yy, units, phys)
 
-        # merger event: terminate if min pair distance crosses r_merge downward
-        def ev_merge(t, yy):
-            return min_pair_distance(yy) - r_merge
-        ev_merge.terminal = True
-        ev_merge.direction = -1
+        events = None
+        if use_stop_event:
+            def ev_stop(t, yy):
+                return min_pair_distance(yy) - r_stop
+            ev_stop.terminal = True
+            ev_stop.direction = -1
+            events = [ev_stop]
 
-        sol = solve_ivp(
-            fun, (t0, t1), y,
-            method=sim.method,
-            rtol=sim.rtol, atol=sim.atol,
-            max_step=sim.max_step,
-            events=[ev_merge],
-        )
+        try:
+            sol = solve_ivp(
+                fun, (t0, t1), y,
+                method=sim.method,
+                rtol=sim.rtol, atol=sim.atol,
+                max_step=sim.max_step,
+                events=events,
+            )
+        except TimeoutError:
+            solver_success = False
+            solver_status = -2
+            solver_message = f"Aborted: walltime exceeded ({max_wall}s)"
+            timeout = True
+            stop_reason = "walltime"
+            break
+        except Exception as e:
+            solver_success = False
+            solver_status = -3
+            solver_message = f"Exception in solve_ivp: {type(e).__name__}: {e}"
+            timeout = True
+            stop_reason = "exception"
+            break
 
-        # append (avoid duplicating first point across chunks)
-        if not t_list:
-            t_list.extend(sol.t.tolist())
-            y_chunks.append(sol.y.T)
-        else:
+        solver_success = bool(sol.success)
+        solver_status = int(sol.status)
+        solver_message = str(sol.message)
+
+        # append results (skip the duplicated first point)
+        if sol.t.size > 1:
             t_list.extend(sol.t[1:].tolist())
             y_chunks.append(sol.y.T[1:])
+
+        if sol.t.size == 0:
+            solver_success = False
+            solver_status = -4
+            solver_message = "solve_ivp returned empty time array"
+            timeout = True
+            stop_reason = "solver_empty"
+            break
 
         y = sol.y[:, -1].copy()
         t0 = float(sol.t[-1])
 
+        if not np.all(np.isfinite(y)):
+            solver_success = False
+            solver_status = -5
+            solver_message = "Non-finite state encountered (nan/inf)"
+            timeout = True
+            stop_reason = "nonfinite"
+            break
+
+        if min_adv > 0.0 and (t0 - t_prev) < min_adv:
+            solver_success = False
+            solver_status = -6
+            solver_message = "Stalled: solver did not advance time"
+            timeout = True
+            stop_reason = "stalled"
+            break
+
+        # If SciPy reports failure (status=-1), stop immediately.
+        # Otherwise basin sweeps can hang forever.
+        if solver_status == -1 or (not solver_success):
+            timeout = True
+            stop_reason = "solver_failed"
+            break
+
         if rg > 0 and min_pair_distance(y) < r_warn:
             pn_warning = True
 
-        if sol.status == 1:
+        if use_stop_event and solver_status == 1:
             merged = True
+            stop_reason = "r_merge" if (np.isfinite(r_merge) and r_merge >= r_coll and r_merge > 0) else "r_coll"
             break
 
-        # early stop: clearly separated + far field
         if _is_hierarchical(y, sim.hier_ratio) and (_max_radius_from_com(y, phys) > sim.R_end):
+            stop_reason = "hierarchical_far"
             break
 
         # memory guard
@@ -117,12 +190,12 @@ def integrate_scatter(units: Units,
             t_list = T[idx].tolist()
             y_chunks = [Y[idx]]
 
-    if t0 >= sim.t_max and (not merged):
+    if t0 >= sim.t_max and (not merged) and (not timeout):
         timeout = True
+        stop_reason = "t_max"
 
     T = np.array(t_list, dtype=float)
     Y = np.vstack(y_chunks)
-
     E_end = energy_newton(Y[-1], units, phys)
 
     return {
@@ -132,7 +205,12 @@ def integrate_scatter(units: Units,
         "merged": merged,
         "timeout": timeout,
         "pn_warning": pn_warning,
+        "stop_reason": stop_reason,
+        "r_stop": float(r_stop),
         "E0": float(E0),
         "E_end": float(E_end),
         "runtime_sec": float(time.time() - start),
+        "solver_success": bool(solver_success),
+        "solver_status": int(solver_status),
+        "solver_message": str(solver_message),
     }

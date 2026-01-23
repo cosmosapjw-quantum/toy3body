@@ -1,0 +1,61 @@
+{
+  "seed0": 1234,
+
+  "mu_list": [1.0, 0.3, 0.1, 0.03, 0.01],
+  "nu_list": [1.0, 0.3, 0.1, 0.03, 0.01, 0.003, 0.001],
+
+  "epsilon_list": [0.0, 0.0001, 0.0003, 0.001, 0.003],
+
+  "v_inf_list": [0.1, 0.3, 0.6, 1.0, 1.5, 2.5, 4.0],
+  "b_max": 10.0,
+  "n_per_setting": 80,
+
+  "a0": 1.0,
+  "R0": 120.0,
+  "random_phase": true,
+  "random_theta": true,
+
+  "sim": {
+    "method": "DOP853",
+    "rtol": 1e-10,
+    "atol": 1e-12,
+    "max_step": 1e30,
+
+    "t_max": 3000.0,
+    "dt_chunk": 50.0,
+
+    "R_int": 25.0,
+    "R_end": 400.0,
+    "hier_ratio": 6.0,
+
+    "max_store_points": 25000,
+    "decimate_to": 6000
+  },
+
+  "loop": {
+    "eps_close": 0.015,
+    "min_dt": 8.0,
+    "k_nn": 16,
+
+    "max_loops_base": 1,
+    "max_loops_long": 8,
+    "t_long": 250.0,
+
+    "resample_n": 384,
+
+    "link_round_tol": 0.1,
+    "link_min_sep": 0.001
+  },
+
+  "output": {
+    "out_dir": "out_runs",
+    "store_raw": true,
+    "store_raw_every": 80,
+    "compress_npz": true
+  },
+
+  "parallel": {
+    "workers": 0,
+    "chunksize": 1
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "out_dir": "out_runs",
+  "seed0": 1234,
+  "max_workers": 0,
+  "store_raw_every": 50,
+
+  "mu_list": [1.0, 0.3, 0.1, 0.03, 0.01],
+  "nu_list": [1.0, 0.3, 0.1, 0.03, 0.01, 0.003, 0.001],
+  "epsilon_list": [0.0, 0.0001, 0.0003, 0.001, 0.003],
+  "v_inf_list": [0.1, 0.3, 0.6, 1.0, 1.5, 2.5, 4.0],
+  "b_max": 10.0,
+  "n_per_setting": 120,
+
+  "ic_a0": 1.0,
+  "ic_e0": 0.0,
+  "ic_R0": 120.0,
+  "ic_randomize_phase": true,
+  "ic_randomize_theta": true,
+
+  "phys_k_warn": 50.0,
+  "phys_k_merge": 10.0,
+
+  "sim_method": "DOP853",
+  "sim_rtol": 1e-10,
+  "sim_atol": 1e-12,
+  "sim_max_step": null,
+  "sim_t_max": 3000.0,
+  "sim_dt_chunk": 50.0,
+  "sim_R_int": 25.0,
+  "sim_R_end": 400.0,
+  "sim_hier_ratio": 6.0,
+  "sim_max_store_points": 25000,
+  "sim_decimate_to": 6000,
+
+  "loop_eps_close": 0.015,
+  "loop_min_dt": 8.0,
+  "loop_k_nn": 16,
+  "loop_max_loops_base": 1,
+  "loop_max_loops_long": 8,
+  "loop_t_long": 250.0,
+  "loop_resample_n": 384,
+  "loop_link_round_tol": 0.1,
+  "loop_link_min_sep": 0.001
+}

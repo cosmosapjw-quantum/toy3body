@@ -58,6 +58,19 @@ class SimParams:
     max_store_points: int = 20000
     decimate_to: int = 5000
 
+    # --- numerical safety rails (useful for chaotic scattering grids) ---
+    # Collision cut used even in pure Newton runs to prevent pathological
+    # near-collisions from stalling the integrator. Set <= 0 to disable.
+    r_coll: float = 1e-5
+
+    # Hard wall-clock limit for a single trajectory integration (seconds).
+    # Set <= 0 to disable.
+    max_walltime_sec: float = 0.0
+
+    # Minimum required advance in time per chunk; if the solver fails to
+    # advance, we bail out instead of spinning forever.
+    min_t_advance: float = 1e-12
+
 
 @dataclass(frozen=True)
 class ICParams:

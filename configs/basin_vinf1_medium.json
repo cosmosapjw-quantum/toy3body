@@ -1,0 +1,33 @@
+{
+  "out_dir": "out_basin_vinf1_medium",
+  "phys": {
+    "m1": 0.5,
+    "m2": 0.5,
+    "m3": 0.1,
+    "epsilon": 0.0,
+    "k_warn": 50.0,
+    "k_merge": 10.0
+  },
+  "sim": {
+    "method": "DOP853",
+    "rtol": 1e-10,
+    "atol": 1e-12,
+    "max_step": 1e30,
+    "t_max": 2000.0,
+    "dt_chunk": 50.0,
+    "R_int": 25.0,
+    "R_end": 400.0,
+    "hier_ratio": 6.0,
+    "max_store_points": 20000,
+    "decimate_to": 5000
+  },
+  "v_inf": 1.0,
+  "R0": 120.0,
+  "theta": 0.0,
+  "nb": 240,
+  "nphi": 240,
+  "b_range": [0.0, 10.0],
+  "seed0": 20000,
+  "workers": 0,
+  "chunksize": 16
+}
